@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from .i2c import I2C
+# from .i2c import I2C
 
 
-class ADC(I2C):
+class ADC:
     """
     Analog to digital converter
     """
@@ -15,6 +15,7 @@ class ADC(I2C):
         :param chn: channel number (0-7/A0-A7)
         :type chn: int/str
         """
+        return
         if address is not None:
             super().__init__(address, *args, **kwargs)
         else:
@@ -43,6 +44,7 @@ class ADC(I2C):
         :return: ADC value(0-4095)
         :rtype: int
         """
+        return 0
         # Write register address
         self.write([self.chn, 0, 0])
         # Read values
@@ -60,6 +62,7 @@ class ADC(I2C):
         :return: Voltage value(0-3.3(V))
         :rtype: float
         """
+        return 0.0
         # Read ADC value
         value = self.read()
         # Convert to voltage

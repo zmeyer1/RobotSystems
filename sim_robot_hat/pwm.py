@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import math
-from .i2c import I2C
+# from .i2c import I2C
 
 timer = [{"arr": 1}] * 7
 
-class PWM(I2C):
+class PWM:
     """Pulse width modulation (PWM)"""
 
     REG_CHN = 0x20
@@ -30,6 +30,7 @@ class PWM(I2C):
         :param channel: PWM channel number(0-19/P0-P19)
         :type channel: int/str
         """
+        return
         if address is None:
             super().__init__(self.ADDR, *args, **kwargs)
         else:
@@ -61,6 +62,7 @@ class PWM(I2C):
         self.freq(50)
 
     def _i2c_write(self, reg, value):
+        return
         value_h = value >> 8
         value_l = value & 0xff
         self.write([reg, value_h, value_l])
@@ -75,8 +77,9 @@ class PWM(I2C):
         :rtype: float
         """
         if freq == None:
-            return self._freq
-
+            return 0.0
+        else:
+            return
         self._freq = int(freq)
         # [prescaler,arr] list
         result_ap = []
@@ -110,7 +113,9 @@ class PWM(I2C):
         :rtype: int
         """
         if prescaler == None:
-            return self._prescaler
+            return 0
+        else:
+            return
 
         self._prescaler = round(prescaler)
         self._freq = self.CLOCK/self._prescaler/timer[self.timer]["arr"]
@@ -132,7 +137,9 @@ class PWM(I2C):
         """
         global timer
         if arr == None:
-            return timer[self.timer]["arr"]
+            return 0
+        else:
+            return None
 
         timer[self.timer]["arr"] = round(arr)
         self._freq = self.CLOCK/self._prescaler/timer[self.timer]["arr"]
@@ -155,7 +162,9 @@ class PWM(I2C):
         :rtype: float
         """
         if pulse_width == None:
-            return self._pulse_width
+            return 0.0
+        else:
+            return
 
         self._pulse_width = int(pulse_width)
         reg = self.REG_CHN + self.channel
@@ -172,7 +181,9 @@ class PWM(I2C):
         """
         global timer
         if pulse_width_percent == None:
-            return self._pulse_width_percent
+            return 0.0
+        else:
+            return
 
         self._pulse_width_percent = pulse_width_percent
         temp = self._pulse_width_percent / 100.0

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from .basic import _Basic_class
-import gpiozero  # https://gpiozero.readthedocs.io/en/latest/installing.html
-from gpiozero import OutputDevice, InputDevice, Button
+# import gpiozero  # https://gpiozero.readthedocs.io/en/latest/installing.html
+# from gpiozero import OutputDevice, InputDevice, Button
 
 
 class Pin(_Basic_class):
@@ -91,9 +91,11 @@ class Pin(_Basic_class):
         self._info("Pin init finished.")
 
     def close(self):
+        return
         self.gpio.close()
 
     def deinit(self):
+        return
         self.gpio.close()
         self.gpio.pin_factory.close()
 
@@ -106,6 +108,7 @@ class Pin(_Basic_class):
         :param pull: pin pull up/down(PUD_UP/PUD_DOWN/PUD_NONE)
         :type pull: int
         """
+        return
         # check mode
         if mode in [None, self.OUT, self.IN]:
             self._mode = mode
@@ -170,6 +173,7 @@ class Pin(_Basic_class):
         :return: pin value(0/1)
         :rtype: int
         """
+        return 0 or value
         if value == None:
             if self._mode in [None, self.OUT]:
                 self.setup(self.IN)
@@ -234,6 +238,7 @@ class Pin(_Basic_class):
         :param bouncetime: interrupt bouncetime in miliseconds
         :type bouncetime: int
         """
+        return
         # check trigger
         if trigger not in [
                 self.IRQ_FALLING, self.IRQ_RISING, self.IRQ_RISING_FALLING

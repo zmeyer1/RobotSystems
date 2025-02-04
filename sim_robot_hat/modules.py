@@ -2,7 +2,7 @@
 from .pin import Pin
 from .pwm import PWM
 from .adc import ADC
-from .i2c import I2C
+# from .i2c import I2C
 import time
 from .basic import _Basic_class
 from typing import Union, List, Tuple, Optional
@@ -56,7 +56,7 @@ class Ultrasonic():
                 return a
         return -1
 
-class ADXL345(I2C):
+class ADXL345:
     """ADXL345 modules"""
 
     X = 0
@@ -97,27 +97,7 @@ class ADXL345(I2C):
             return self._read(axis)
 
     def _read(self, axis: int) -> float:
-        raw_2 = 0
-        result = super().read()
-        data = (0x08 << 8) + self._REG_POWER_CTL
-        if result:
-            self.write(data)
-        self.mem_write(0, 0x31)
-        self.mem_write(8, 0x2D)
-        raw = self.mem_read(2, self._AXISES[axis])
-        # 第一次读的值总是为0，所以多读取一次
-        self.mem_write(0, 0x31)
-        self.mem_write(8, 0x2D)
-        raw = self.mem_read(2, self._AXISES[axis])
-        if raw[1] >> 7 == 1:
-
-            raw_1 = raw[1] ^ 128 ^ 127
-            raw_2 = (raw_1 + 1) * -1
-        else:
-            raw_2 = raw[1]
-        g = raw_2 << 8 | raw[0]
-        value = g / 256.0
-        return value
+        return 0.0
 
 
 class RGB_LED():

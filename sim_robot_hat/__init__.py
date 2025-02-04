@@ -4,7 +4,7 @@ Robot Hat Library
 """
 from .adc import ADC
 from .filedb import fileDB
-from .i2c import I2C
+# from .i2c import I2C
 from .modules import *
 from .music import Music
 from .motor import Motor, Motors
@@ -30,8 +30,8 @@ def __usage__():
 def get_firmware_version():
     ADDR = [0x14, 0x15]
     VERSSION_REG_ADDR = 0x05
-    i2c = I2C(ADDR)
-    version = i2c.mem_read(3, VERSSION_REG_ADDR)
+    # i2c = I2C(ADDR)
+    version = (0,0,0)
     print(f"Robot HAT Firmare version: {version[0]}.{version[1]}.{version[2]}")
 
 def __main__():
