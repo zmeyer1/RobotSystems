@@ -1,84 +1,95 @@
-import cv2, os
+import cv2, os, time
 from vilib import Vilib
 import picarx_improved as pcx
 from sensor_control import SensorController
 import numpy as np
+import atexit
 
 
-def find_line(im):
+class CameraSensor:
 
-    im_grey = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    def __init__(self):
+        Vilib.camera_start()
+        atexit.register(Vilib.camera_close)
 
-    blurred = cv2.GaussianBlur(im_grey, (9, 9), 0)
-
-    # mask = cv2.Canny(blurred, 10, 20)
-    _, mask = cv2.threshold(blurred, 10, 255, cv2.THRESH_BINARY_INV)
-    # mask = cv2.adaptiveThreshold(blurred,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
-    #         cv2.THRESH_BINARY,11,2)
-
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((5,5)))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5,5)))
-
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    pt = ()
-    if len(contours) > 0:
-        line = max(contours, key = cv2.contourArea)
-        M = cv2.moments(line)
-        pt = (int(M["m10"] / M["m00"]),int(M["m01"] / M["m00"]))
-
-    # https://github.com/tprlab/pitanq-dev/blob/master/selfdrive/follow_line/README.md
+    def read(self):
+        return Vilib.img
     
+    def close(self):
+        Vilib.camera_close()
 
-    return pt
+
+class CameraInterpreter:
+
+    def __init__(self):
+        self.threshold=10
+        self.max_value=255
 
 
-def steer_with_camera(car, controller, display=True):
+    def interpret(self, reading: np.array, display=True):
+
+        im_grey = cv2.cvtColor(reading, cv2.COLOR_BGR2GRAY)
+
+        blurred = cv2.GaussianBlur(im_grey, (9, 9), 0)
+        _, mask = cv2.threshold(blurred, self.threshold, self.max_value, cv2.THRESH_BINARY_INV)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((5,5)))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5,5)))
+
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        control = 0
+        if len(contours) > 0:
+            line = max(contours, key = cv2.contourArea)
+            M = cv2.moments(line)
+            pt = (int(M["m10"] / M["m00"]),int(M["m01"] / M["m00"]))
+            midpt = reading.shape[1]//2
+            control = (pt[0] - midpt) / reading.shape[1]
+
+            if display:
+                cv2.circle(reading, pt, radius = 5, color=(255,0,0), thickness=2)
+                cv2.imshow("window", reading)
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('q'):
+                    cv2.destroyAllWindows()
+                    return None
+        
+            
+        return control
+
+
+def steer_with_camera(car):
+
+    car.set_cam_tilt_angle(-35)
+
+    sensor = CameraSensor()
+
+    interpreter = CameraInterpreter()
+
+    cont = SensorController(car)
+
+    time.sleep(0.5)
 
     car.forward(25)
 
     while True:
 
-        frame = Vilib.img
+        frame = sensor.read()
 
-        frame = frame[frame.shape[0]//2:, :frame.shape[1], :]
-        
-        pt = find_line(frame)
 
-        midpt = frame.shape[1]//2
+        control = interpreter.interpret(frame)
 
-        if len(pt) > 1:
-            control = (pt[0] - midpt) / frame.shape[1]
-            cv2.circle(frame, pt, radius = 5, color=(255,0,0), thickness=2)
+        if control is None:
+            break
 
-            controller.sensor_steer(control)
-
-        if display:
-
-            cv2.imshow("window", frame)
-
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):  # Press 'q' to quit
-                car.stop()
-                Vilib.camera_close()
-                break
-
-    if display:
-        cv2.destroyAllWindows()
-
+        cont.sensor_steer(control)
+    sensor.close()
 
 if __name__ == "__main__":
     
     
-    Vilib.camera_start()
-
     car = pcx.Picarx()
 
-    car.set_cam_tilt_angle(-35)
-
-    cont = SensorController(car)
-
-    steer_with_camera(car, cont)
+    steer_with_camera(car)
 
     
 
