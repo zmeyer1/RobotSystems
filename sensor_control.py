@@ -47,7 +47,6 @@ def steer_with_sensors(car, sensor, interpreter, controller):
         controller.sensor_steer(interpreter.interpret(sensor.read()))
 
 
-
 if __name__ == "__main__":
     car = pcx.Picarx()
     car.reset()
