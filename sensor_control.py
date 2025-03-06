@@ -35,6 +35,8 @@ class SensorController:
         self.scaling_factor = scaling_factor
 
     def sensor_steer(self, direction: float) -> float:
+        if direction is None:
+            return 0
         angle_cmd = direction * self.scaling_factor
         self.car.set_dir_servo_angle(angle_cmd)
         return angle_cmd

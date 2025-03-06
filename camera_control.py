@@ -28,6 +28,9 @@ class CameraInterpreter:
 
     def interpret(self, reading: np.array, display=True):
 
+        if reading is None:
+            return None
+
         im_grey = cv2.cvtColor(reading, cv2.COLOR_BGR2GRAY)
 
         blurred = cv2.GaussianBlur(im_grey, (9, 9), 0)
