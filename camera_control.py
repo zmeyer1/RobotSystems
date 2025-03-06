@@ -1,6 +1,5 @@
-import cv2, os, time
+import cv2, time
 from vilib import Vilib
-import picarx_improved as pcx
 from sensor_control import SensorController
 import numpy as np
 import atexit
@@ -11,6 +10,7 @@ class CameraSensor:
     def __init__(self):
         Vilib.camera_start()
         atexit.register(Vilib.camera_close)
+        time.sleep(0.5)
 
     def read(self):
         return Vilib.img
@@ -26,7 +26,7 @@ class CameraInterpreter:
         self.max_value=255
 
 
-    def interpret(self, reading: np.array, display=True):
+    def interpret(self, reading: np.array, display=False):
 
         if reading is None:
             return None
@@ -60,19 +60,14 @@ class CameraInterpreter:
         return control
 
 
-def steer_with_camera(car):
+def steer_with_camera():
 
-    car.set_cam_tilt_angle(-35)
 
     sensor = CameraSensor()
 
     interpreter = CameraInterpreter()
 
-    cont = SensorController(car)
-
-    time.sleep(0.5)
-
-    car.forward(25)
+    cont = SensorController()
 
     while True:
 
@@ -85,14 +80,13 @@ def steer_with_camera(car):
             break
 
         cont.sensor_steer(control)
+
     sensor.close()
 
 if __name__ == "__main__":
     
     
-    car = pcx.Picarx()
-
-    steer_with_camera(car)
+    steer_with_camera()
 
     
 

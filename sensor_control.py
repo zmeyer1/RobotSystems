@@ -30,11 +30,18 @@ class SensorInterpreter:
 
 
 class SensorController:
-    def __init__(self, car, scaling_factor: float = 50):
-        self.car = car
+    def __init__(self, scaling_factor: float = 50):
+        self.car = pcx.Picarx()
+        self.car.reset()
+        self.car.set_cam_tilt_angle(-35)
+
+        self.is_running = False
         self.scaling_factor = scaling_factor
 
     def sensor_steer(self, direction: float) -> float:
+        if not self.is_running:
+            self.car.forward(25)
+            self.is_running = True
         if direction is None:
             return 0
         angle_cmd = direction * self.scaling_factor
@@ -42,18 +49,15 @@ class SensorController:
         return angle_cmd
 
 
-def steer_with_sensors(car, sensor, interpreter, controller):
+def steer_with_sensors(sensor, interpreter, controller):
 
-    car.forward(25)
     while True:
         controller.sensor_steer(interpreter.interpret(sensor.read()))
 
 
 if __name__ == "__main__":
-    car = pcx.Picarx()
-    car.reset()
     sensor = Sensor()
     interpreter = SensorInterpreter()
-    controller = SensorController(car)
+    controller = SensorController()
 
-    steer_with_sensors(car, sensor, interpreter, controller)
+    steer_with_sensors(sensor, interpreter, controller)
